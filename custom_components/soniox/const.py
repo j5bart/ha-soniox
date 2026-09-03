@@ -14,6 +14,8 @@ CONF_TTS_VOICE: Final = "tts_voice"
 CONF_TTS_LANGUAGE: Final = "tts_language"
 CONF_TTS_AUDIO_FORMAT: Final = "tts_audio_format"
 CONF_TTS_SAMPLE_RATE: Final = "tts_sample_rate"
+CONF_TTS_SPEED: Final = "tts_speed"
+CONF_TTS_REDUCE_SILENCE: Final = "tts_reduce_silence"
 
 # Soniox endpoints
 STT_WEBSOCKET_URL: Final = "wss://stt-rt.soniox.com/transcribe-websocket"
@@ -23,13 +25,28 @@ TTS_MODELS_URL: Final = "https://api.soniox.com/v1/tts-models"
 
 # Defaults
 DEFAULT_STT_MODEL: Final = "stt-rt-v4"
-DEFAULT_TTS_MODEL: Final = "tts-rt-v1"
+DEFAULT_TTS_MODEL: Final = "tts-rt-v2"
 DEFAULT_TTS_VOICE: Final = "Maya"
 DEFAULT_TTS_LANGUAGE: Final = "en"
 DEFAULT_TTS_AUDIO_FORMAT: Final = "mp3"
 DEFAULT_TTS_SAMPLE_RATE: Final = 24000
+DEFAULT_TTS_SPEED: Final = 1.0
+DEFAULT_TTS_REDUCE_SILENCE: Final = False
 
-# Built-in voice list (https://soniox.com/docs/tts/models — all voices speak all languages).
+# Soniox accepts a speaking rate between these bounds; 1.0 is unmodified.
+TTS_SPEED_MIN: Final = 0.7
+TTS_SPEED_MAX: Final = 1.3
+TTS_SPEED_STEP: Final = 0.05
+
+# Fallback model list, used when the models endpoint cannot be reached while
+# the options form is built. Soniox is the source of truth
+# (https://soniox.com/docs/tts/models); tts-rt-v1 is deprecated and is removed
+# on 2026-08-31, after which requests to it are served by tts-rt-v2.
+TTS_MODELS: Final = ["tts-rt-v2", "tts-rt-v1"]
+
+# Fallback voice list, used when the models endpoint cannot be reached while
+# the options form is built. All voices speak all supported languages
+# (https://soniox.com/docs/tts/models).
 TTS_VOICES: Final = [
     "Maya", "Daniel", "Noah", "Nina", "Emma", "Jack", "Adrian", "Claire",
     "Grace", "Owen", "Mina", "Kenji", "Rafael", "Mateo", "Lucia", "Sofia",

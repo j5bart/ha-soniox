@@ -7,7 +7,7 @@ import base64
 import json
 import logging
 import uuid
-from collections.abc import AsyncGenerator
+from collections.abc import AsyncGenerator, Mapping
 from typing import Any
 
 import aiohttp
@@ -33,12 +33,16 @@ from .const import (
     CONF_TTS_AUDIO_FORMAT,
     CONF_TTS_LANGUAGE,
     CONF_TTS_MODEL,
+    CONF_TTS_REDUCE_SILENCE,
     CONF_TTS_SAMPLE_RATE,
+    CONF_TTS_SPEED,
     CONF_TTS_VOICE,
     DEFAULT_TTS_AUDIO_FORMAT,
     DEFAULT_TTS_LANGUAGE,
     DEFAULT_TTS_MODEL,
+    DEFAULT_TTS_REDUCE_SILENCE,
     DEFAULT_TTS_SAMPLE_RATE,
+    DEFAULT_TTS_SPEED,
     DEFAULT_TTS_VOICE,
     DOMAIN,
     SUPPORTED_LANGUAGES,
@@ -55,6 +59,20 @@ _EXTENSION_BY_FORMAT = {
     "wav": "wav",
     "pcm_s16le": "pcm",
 }
+
+
+def _apply_delivery_options(body: dict[str, Any], options: Mapping[str, Any]) -> None:
+    """Add the optional speed / reduce_silence fields to a request.
+
+    Both are omitted at their defaults so requests stay valid against models
+    that predate them — reduce_silence in particular is rejected outright by
+    models without ``supports_silence_reduction``.
+    """
+    speed = float(options.get(CONF_TTS_SPEED, DEFAULT_TTS_SPEED))
+    if speed != DEFAULT_TTS_SPEED:
+        body["speed"] = speed
+    if options.get(CONF_TTS_REDUCE_SILENCE, DEFAULT_TTS_REDUCE_SILENCE):
+        body["reduce_silence"] = True
 
 
 async def async_setup_entry(
@@ -175,6 +193,7 @@ class SonioxTTSEntity(TextToSpeechEntity):
             body["sample_rate"] = int(
                 self._entry.options.get(CONF_TTS_SAMPLE_RATE, DEFAULT_TTS_SAMPLE_RATE)
             )
+        _apply_delivery_options(body, self._entry.options)
         return body
 
     async def _stream_audio(
@@ -201,17 +220,17 @@ class SonioxTTSEntity(TextToSpeechEntity):
                 timeout=aiohttp.ClientTimeout(total=30),
                 max_msg_size=0,
             ) as ws:
-                await ws.send_json(
-                    {
-                        "api_key": api_key,
-                        "model": model,
-                        "language": language,
-                        "voice": voice,
-                        "audio_format": audio_format,
-                        "sample_rate": sample_rate,
-                        "stream_id": stream_id,
-                    }
-                )
+                config: dict[str, Any] = {
+                    "api_key": api_key,
+                    "model": model,
+                    "language": language,
+                    "voice": voice,
+                    "audio_format": audio_format,
+                    "sample_rate": sample_rate,
+                    "stream_id": stream_id,
+                }
+                _apply_delivery_options(config, self._entry.options)
+                await ws.send_json(config)
 
                 async def pump_text() -> None:
                     async for chunk in request.message_gen:

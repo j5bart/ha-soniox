@@ -35,9 +35,14 @@
           "tts_voice": "Default TTS voice",
           "tts_language": "Default TTS language",
           "tts_audio_format": "TTS audio format",
-          "tts_sample_rate": "TTS sample rate (Hz, used for PCM/WAV)"
+          "tts_sample_rate": "TTS sample rate (Hz, used for PCM/WAV)",
+          "tts_speed": "TTS speaking rate (0.7–1.3, 1.0 is unmodified)",
+          "tts_reduce_silence": "Shorten pauses between words (tts-rt-v2 and newer)"
         }
       }
+    },
+    "error": {
+      "silence_not_supported": "The selected TTS model does not support shortening pauses. Choose tts-rt-v2 or newer, or turn the option off."
     }
   }
 }
