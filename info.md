@@ -9,7 +9,10 @@ Speech-to-text and text-to-speech for Home Assistant powered by
 ## Highlights
 
 - Real-time STT (`stt-rt-v4`) — WebSocket streaming with final tokens.
-- TTS (`tts-rt-v1`) with 28 voices, every voice speaks every language.
+- TTS (`tts-rt-v2`) — every voice speaks every language, with adjustable
+  speaking rate and optional pause shortening.
+- Model and voice lists read from your Soniox account, so new models show up
+  on their own.
 - Per-call voice and audio-format overrides.
 - No external Python dependencies — built on Home Assistant's bundled `aiohttp`.
 
